@@ -108,6 +108,7 @@ abstract class Migration extends IlluminateMigration
             }
 			$this->handleException($exception);
 		}
+
         if (version_compare(phpversion(), '8.0', '>=')) {
             DB::commit();
         } else {
