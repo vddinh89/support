@@ -6,6 +6,7 @@ use Illuminate\Database\Migrations\Migration as IlluminateMigration;
 use Illuminate\Database\Schema\Blueprint;
 use Exception;
 use Schema;
+use Illuminate\Support\Facades\DB;
 
 abstract class Migration extends IlluminateMigration
 {
@@ -88,20 +89,30 @@ abstract class Migration extends IlluminateMigration
 	 */
 	protected function executeInTransaction($method)
 	{
-		$this->connection->beginTransaction();
+        if (version_compare(phpversion(), '8.0', '>=')) {
+            DB::beginTransaction();
+        } else {
+		    $this->connection->beginTransaction();
+        }
 
-		try 
+		try
 		{
 			$this->{$method}();
-		} 
+		}
 		catch (\Exception $exception)
 		{
-			$this->connection->rollback();
-
+            if (version_compare(phpversion(), '8.0', '>=')) {
+                DB::rollback();
+            } else {
+                $this->connection->rollback();
+            }
 			$this->handleException($exception);
 		}
-
-		$this->connection->commit();
+        if (version_compare(phpversion(), '8.0', '>=')) {
+            DB::commit();
+        } else {
+            $this->connection->commit();
+        }
 	}
 
 	/**
